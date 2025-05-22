@@ -58,9 +58,6 @@ class GLScene(Scene):
     def setup(self, **kwargs) -> None:
         GLUtils.init_ortho(-1, 1, -1, 1)
 
-    def render(self, **kwargs) -> None:
-        GLUtils.prepare_render(**kwargs)
-
     def to_ortho(self, x, y) -> tuple:
         return (
             (2*x - self.screen_width)/self.screen_width,
