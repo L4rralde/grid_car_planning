@@ -38,7 +38,6 @@ class Grid:
 
     def append(self, x: float, y: float) -> None:
         i, j = self.ortho_to_grid(x, y)
-        print(i,)
         if i >= self.res or j >= self.res:
             return
         if self.occupancy[i][j] == 1.0:

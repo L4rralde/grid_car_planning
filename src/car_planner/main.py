@@ -32,7 +32,6 @@ class GridScene(GLScene):
                 self.left_mouse_down = True
             if event.type == pygame.MOUSEBUTTONDOWN and event.button==3:
                 self.right_mouse_down = True
-                print(self.right_mouse_down)
             elif event.type == pygame.MOUSEBUTTONUP:
                 self.left_mouse_down = False
                 self.right_mouse_down = False
@@ -44,11 +43,6 @@ class GridScene(GLScene):
                 x, y = pygame.mouse.get_pos()
                 ortho_x, ortho_y = self.to_ortho(x, y)
                 self.grid.pop(ortho_x, ortho_y)
-
-    def finish(self, **kwargs) -> None:
-        super().finish(**kwargs)
-        self.grid.save()
-
 
 def main():
     scene = GridScene("Grid", 800, 800, 20)

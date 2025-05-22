@@ -34,7 +34,6 @@ for i in range(wg):
     for j in range(hg):
         if not grid[i][j]:
             continue
-        print(i, j, grid[i][j])
         cv.circle(res,(j*8, i*8), 5, (0,0,255), 3)
 
 cv.imshow("", res)
