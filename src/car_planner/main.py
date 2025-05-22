@@ -5,7 +5,7 @@ from gridsim.scenes import GLScene
 from gridsim.grid import Grid
 from utils.utils import GIT_ROOT
 from gridsim.glutils import load_texture_from_image, draw_background
-
+from gridsim.shapes import Circle
 
 class GridScene(GLScene):
     def __init__(self, title: str, width: int, height: int, max_fps: int) -> None:
@@ -14,11 +14,13 @@ class GridScene(GLScene):
         self.right_mouse_down = False
         self.grid = Grid()
         self.texture_bg = self.load_surface()
+        self.circle = Circle(0, 0, 0.1)
 
     def render(self, **kwargs) -> None:
         super().render(**kwargs)
         draw_background(*self.texture_bg)
         self.grid.draw(point_size = 5)
+        self.circle.draw()
 
     def get_inputs(self, **kwargs) -> None:
         return super().get_inputs(**kwargs)
@@ -42,7 +44,7 @@ class GridScene(GLScene):
     def load_surface(self) -> object:
         image_path = f"{GIT_ROOT}/world/parking.jpeg"
         surface = pygame.image.load(image_path)
-        surface = pygame.transform.flip(surface, False, True)  # Flip vertically
+        #surface = pygame.transform.flip(surface, False, True)  # Flip vertically
         image = pygame.image.tostring(surface, "RGB", True)
         width, height = surface.get_size()
         return load_texture_from_image(image, width, height)

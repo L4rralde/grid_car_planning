@@ -28,6 +28,18 @@ def draw_point(x: int, y: int, **kwargs) -> None:
     glEnd()
 
 
+def draw_polygon(points: list, **kwargs) -> None:
+        color = kwargs.get("color", (0.1, 0.1, 0.2, 1))
+        size = kwargs.get("size", 1)
+
+        glColor(*color)
+        glPointSize(size)
+        glBegin(GL_TRIANGLE_FAN)
+        for x, y in points:
+            glVertex2f(x, y)
+        glEnd()
+
+
 def load_texture_from_image(image: object, width: int, height):
     # Generate OpenGL texture
     texture_id = glGenTextures(1)
@@ -42,35 +54,18 @@ def load_texture_from_image(image: object, width: int, height):
     return texture_id, width, height
 
 
-def draw_background(texture_id, width, height):
-    glMatrixMode(GL_PROJECTION)
-    glPushMatrix()
-    glLoadIdentity()
-    glOrtho(0, width, height, 0, -1, 1)  # 2D orthographic projection
-
-    glMatrixMode(GL_MODELVIEW)
-    glPushMatrix()
-    glLoadIdentity()
-
-    glDisable(GL_DEPTH_TEST)  # Background doesn't need depth
+def draw_background(tex_id, width, height):
     glEnable(GL_TEXTURE_2D)
-    glBindTexture(GL_TEXTURE_2D, texture_id)
+    glBindTexture(GL_TEXTURE_2D, tex_id)
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE)
+    glColor4f(1.0, 1.0, 1.0, 1.0)
 
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE)  # Prevent tinting
-    glColor4f(1.0, 1.0, 1.0, 1.0)  # Make sure color doesn't modulate texture
-
+    # Cover full normalized viewport [-1, 1]
     glBegin(GL_QUADS)
-    glTexCoord2f(0, 0); glVertex2f(0, 0)
-    glTexCoord2f(1, 0); glVertex2f(width, 0)
-    glTexCoord2f(1, 1); glVertex2f(width, height)
-    glTexCoord2f(0, 1); glVertex2f(0, height)
+    glTexCoord2f(0, 0); glVertex2f(-1, -1)
+    glTexCoord2f(1, 0); glVertex2f( 1, -1)
+    glTexCoord2f(1, 1); glVertex2f( 1,  1)
+    glTexCoord2f(0, 1); glVertex2f(-1,  1)
     glEnd()
 
     glDisable(GL_TEXTURE_2D)
-    glEnable(GL_DEPTH_TEST)
-
-    # Restore matrices
-    glPopMatrix()  # MODELVIEW
-    glMatrixMode(GL_PROJECTION)
-    glPopMatrix()
-    glMatrixMode(GL_MODELVIEW)  # Back to modelview mode
