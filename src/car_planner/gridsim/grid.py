@@ -20,11 +20,12 @@ class Grid:
 
     def draw(self, **kwargs) -> None:
         color = kwargs.get('grid_color', (0.9, 0.2, 0.2, 1.0))
+        pt_size = kwargs.get('point_size', 1)
         for row in self.points:
             for pt in row:
                 if pt is None:
                     continue
-                pt.draw(size=5, color = color)
+                pt.draw(size=pt_size, color = color)
 
     def grid_to_ortho(self, i: int, j: int) -> None:
         ortho_x = 2*i/self.res - 1

@@ -13,20 +13,15 @@ class GridScene(GLScene):
         self.left_mouse_down = False
         self.right_mouse_down = False
         self.grid = Grid()
-        image_path = f"{GIT_ROOT}/world/parking.jpeg"
-        surface = pygame.image.load(image_path)
-        surface = pygame.transform.flip(surface, False, True)  # Flip vertically
-        image = pygame.image.tostring(surface, "RGB", True)
-        width, height = surface.get_size()
-        self.texture_bg = load_texture_from_image(image, width, height)
+        self.texture_bg = self.load_surface()
 
     def render(self, **kwargs) -> None:
         super().render(**kwargs)
         draw_background(*self.texture_bg)
-        self.grid.draw(**kwargs)
+        self.grid.draw(point_size = 5)
 
     def get_inputs(self, **kwargs) -> None:
-        super().get_inputs(**kwargs)
+        return super().get_inputs(**kwargs)
         for event in self.events:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button==1:
                 self.left_mouse_down = True
@@ -44,9 +39,18 @@ class GridScene(GLScene):
                 ortho_x, ortho_y = self.to_ortho(x, y)
                 self.grid.pop(ortho_x, ortho_y)
 
+    def load_surface(self) -> object:
+        image_path = f"{GIT_ROOT}/world/parking.jpeg"
+        surface = pygame.image.load(image_path)
+        surface = pygame.transform.flip(surface, False, True)  # Flip vertically
+        image = pygame.image.tostring(surface, "RGB", True)
+        width, height = surface.get_size()
+        return load_texture_from_image(image, width, height)
+
+
 def main():
     scene = GridScene("Grid", 800, 800, 20)
-    scene.run(background_color=(1.0, 1.0, 1.0, 1.0))
+    scene.run()
 
 
 if __name__ == '__main__':
