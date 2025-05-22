@@ -7,9 +7,7 @@ from utils.utils import GIT_ROOT
 class Grid:
     def __init__(self, res: int=101) -> None:
         self.res = res
-        self.occupancy = np.ones((self.res, self.res))
-        grid_file = np.flip(np.load(f"{GIT_ROOT}/grid.npy").T, axis=1)
-        self.occupancy[0:100, 0:100] = grid_file.copy()
+        self.occupancy = np.load(f"{GIT_ROOT}/grid.npy")
         self.points = [
             [
                 Point(*self.grid_to_ortho(i, j))
