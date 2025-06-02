@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 
 import gridsim.glutils as GLUtils
@@ -25,5 +27,26 @@ class Circle:
             ]
             for th in np.linspace(0, 2*np.pi, 50)
         ]
+        GLUtils.draw_polygon(pts, **kwargs)
 
-        GLUtils.draw_polygon(pts)
+
+class Rectangle:
+    def __init__(self, x: float, y: float, w: float, h: float, yaw: float) -> None:
+        self.center = np.array([x, y])
+        self.w = w
+        self.h = h
+        self.yaw = yaw
+
+    def draw(self) -> None:
+        w_cth = self.w * math.cos(self.yaw)
+        w_sth = self.w * math.sin(self.yaw)
+        h_cth = self.h * math.cos(self.yaw)
+        h_sth = self.h * math.sin(self.yaw)
+        points = self.center + 0.5*np.array([
+            [w_cth - h_sth, w_sth + h_cth],
+            [-w_cth - h_sth, -w_sth + h_cth],
+            [-w_cth + h_sth, -w_sth - h_cth],
+            [w_cth + h_sth, w_sth - h_cth],
+        ])
+
+        GLUtils.draw_polygon(points)

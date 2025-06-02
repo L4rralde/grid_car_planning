@@ -58,3 +58,21 @@ class Grid:
 
     def save(self, path: str="grid") -> None:
         np.save(path, self.occupancy)
+
+    def idx_collides(self, i: int, j: int, r: int) -> bool:
+        sub_grid = self.occupancy[
+            max(0, i-r): min(i + r + 1, self.res),
+            max(0, j-r): min(j + r + 1, self.res)
+        ]
+        return sub_grid.sum() > 0
+
+    def point_collides(self, x: float, y: float, r: float) -> bool:
+        i, j = self.ortho_to_grid(x, y)
+        r = np.round(r * self.res//2).astype(int)
+        return self.idx_collides(i, j, r)
+
+    def sample(self, r: float) -> None:
+        while True:
+            x, y = np.random.uniform(-1.0, 1.0, 2)
+            if not self.point_collides(x, y, r):
+                return x, y

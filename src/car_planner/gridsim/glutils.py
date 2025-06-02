@@ -21,7 +21,7 @@ def draw_point(x: int, y: int, **kwargs) -> None:
     color = kwargs.get("color", (1, 1, 1, 1))
     size = kwargs.get("size", 1)
 
-    glColor(*color)
+    glColor4f(*color)
     glPointSize(size)
     glBegin(GL_POINTS)
     glVertex2f(x, y)
@@ -29,15 +29,15 @@ def draw_point(x: int, y: int, **kwargs) -> None:
 
 
 def draw_polygon(points: list, **kwargs) -> None:
-        color = kwargs.get("color", (0.1, 0.1, 0.2, 1))
-        size = kwargs.get("size", 1)
+    color = kwargs.get("color", (0.1, 0.1, 0.2, 1))
+    size = kwargs.get("size", 1)
 
-        glColor(*color)
-        glPointSize(size)
-        glBegin(GL_TRIANGLE_FAN)
-        for x, y in points:
-            glVertex2f(x, y)
-        glEnd()
+    glColor4f(*color)
+    glPointSize(size)
+    glBegin(GL_TRIANGLE_FAN)
+    for x, y in points:
+        glVertex2f(x, y)
+    glEnd()
 
 
 def load_texture_from_image(image: object, width: int, height):
