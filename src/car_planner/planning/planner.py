@@ -19,7 +19,6 @@ class Planner:
 
     def steer(self, start: tuple, end: tuple) -> bool:
         path = get_optimal_path(start, end)
-        print(path)
-        pts = trace_path_points(path)
-        #print(pts)
+        poses = trace_path_points(path, start)
+        pts = np.array([(x, y) for x, y, _ in poses])
         GLUtils.draw_line(pts, size=4)

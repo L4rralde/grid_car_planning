@@ -16,8 +16,8 @@ class GridScene(GLScene):
         self.grid = Grid()
         self.texture_bg = self.load_surface()
         self.car = Car(0.1, -0.1, 0.0)
-        self.start = [0.25, 0, 0]
-        self.end = [0, 0, 0]
+        self.start = [0.0, 0, 0.0]
+        self.end = [0.25, 0, 0]
         self.planner = Planner(self.grid)
 
     def render(self, **kwargs) -> None:
@@ -37,12 +37,12 @@ class GridScene(GLScene):
                 self.left_mouse_down = True
                 x, y = pygame.mouse.get_pos()
                 ortho_x, ortho_y = self.to_ortho(x, y)
-                self.start = [ortho_x, ortho_y, 1.0]
+                self.end = [ortho_x, ortho_y, 0.0]
             if event.type == pygame.MOUSEBUTTONDOWN and event.button==3:
                 self.right_mouse_down = True
                 x, y = pygame.mouse.get_pos()
                 ortho_x, ortho_y = self.to_ortho(x, y)
-                self.end = [ortho_x, ortho_y, 2.0]
+                self.start = [ortho_x, ortho_y, 0.0]
         return
         for event in self.events:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button==1:
