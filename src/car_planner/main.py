@@ -6,6 +6,7 @@ from collisions.grid import Grid
 from utils.utils import GIT_ROOT
 from gridsim.glutils import load_texture_from_image, draw_background, draw_point
 from car.car import Car
+from planning.planner import Planner
 
 class GridScene(GLScene):
     def __init__(self, title: str, width: int, height: int, max_fps: int) -> None:
@@ -15,24 +16,33 @@ class GridScene(GLScene):
         self.grid = Grid()
         self.texture_bg = self.load_surface()
         self.car = Car(0.1, -0.1, 0.0)
-        self.samples = []
+        self.start = [0.25, 0, 0]
+        self.end = [0, 0, 0]
+        self.planner = Planner(self.grid)
 
     def render(self, **kwargs) -> None:
         super().render(**kwargs)
         draw_background(*self.texture_bg)
         self.grid.draw(point_size = 5)
-        #self.car.draw()
-        #self.car.to_grid()
-        for x, y in self.samples:
-            draw_point(x, y, size=10, color = (0, 0, 1, 1))
+        draw_point(self.start[0], self.start[1], size=10, color=(0, 0, 1, 1))
+        draw_point(self.end[0], self.end[1], size=10, color=(0, 1, 0, 1))
+        self.planner.steer(self.start, self.end)
+
 
     def get_inputs(self, **kwargs) -> None:
         super().get_inputs(**kwargs)
-        return
+
         for event in self.events:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button==1:
-                self.samples.append(self.grid.sample(0.05))
-
+                self.left_mouse_down = True
+                x, y = pygame.mouse.get_pos()
+                ortho_x, ortho_y = self.to_ortho(x, y)
+                self.start = [ortho_x, ortho_y, 1.0]
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button==3:
+                self.right_mouse_down = True
+                x, y = pygame.mouse.get_pos()
+                ortho_x, ortho_y = self.to_ortho(x, y)
+                self.end = [ortho_x, ortho_y, 2.0]
         return
         for event in self.events:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button==1:
@@ -61,7 +71,6 @@ class GridScene(GLScene):
 
     def update(self, **kwargs) -> None:
         super().update(**kwargs)
-        self.samples.append(self.grid.sample(0.02))
 
 def main():
     scene = GridScene("Grid", 800, 800, 20)

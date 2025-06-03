@@ -1,3 +1,5 @@
+from math import cos, sin
+
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
@@ -25,6 +27,18 @@ def draw_point(x: int, y: int, **kwargs) -> None:
     glPointSize(size)
     glBegin(GL_POINTS)
     glVertex2f(x, y)
+    glEnd()
+
+
+def draw_line(points: list, **kwargs) -> None:
+    color = kwargs.get("color", (0.5, 0.0, 0.0, 1))
+    size = kwargs.get("size", 1)
+
+    glColor(*color)
+    glLineWidth(size)
+    glBegin(GL_LINE_STRIP)
+    for x, y in points:
+        glVertex2f(x, y)
     glEnd()
 
 
@@ -69,3 +83,22 @@ def draw_background(tex_id, width, height):
     glEnd()
 
     glDisable(GL_TEXTURE_2D)
+
+
+def rotate(pts: list, angle: float) -> list:
+    new_pts = [
+        [
+            x*cos(angle) - y*sin(angle),
+            x*sin(angle) + y*cos(angle)
+        ]
+        for x, y in pts
+    ]
+    return new_pts
+
+def translate(pts: list, new_origin: list) -> list:
+    x0, y0 = new_origin
+    new_pts = [
+        [x + x0, y + y0]
+        for x, y in pts
+    ]
+    return new_pts

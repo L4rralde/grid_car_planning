@@ -13,7 +13,7 @@ class Car:
     def draw(self) -> None:
         self.rect.draw()
 
-    def to_grid(self) -> list:
+    def split(self) -> list:
         upper = 0.25 * self.rect.h * np.array(
             [-sin(self.rect.yaw), cos(self.rect.yaw)]
         )
@@ -25,3 +25,12 @@ class Car:
             GLUtils.draw_point(*point, size=5)
         return points
 
+    def collides(self, grid: object) -> None:
+        for x, y in self.split():
+            if grid.point_collides(x, y):
+                return True
+        return False
+
+    @property
+    def conf(self) -> tuple:
+        return self.rect.center, self.rect.yaw

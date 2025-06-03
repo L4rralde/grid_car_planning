@@ -50,3 +50,22 @@ class Rectangle:
         ])
 
         GLUtils.draw_polygon(points)
+
+
+class Arc:
+    def __init__(self, center: tuple, r: float, start: float, end: float) -> None:
+        self.center = np.array(center)
+        self.r = r
+        self.n = int(abs(start - end)//0.2)
+        self.angles = np.linspace(min(start, end), max(start, end), self.n)
+
+    def get_pts(self) -> None:
+        pts = np.zeros((self.n, 2))
+        pts[:, 0] = self.r * np.cos(self.angles)
+        pts[:, 1] = self.r * np.sin(self.angles)
+        pts = pts + self.center
+        return pts
+
+    def draw(self) -> None:
+        pts = self.get_pts()
+        GLUtils.draw_line(pts, size=4)
