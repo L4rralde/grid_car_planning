@@ -1,45 +1,9 @@
 import math
 
-import turtle
 import numpy as np
 
 from utils import *
 import reeds_shepp.reeds_shepp as rs
-import gridsim.glutils as GLUtils
-
-
-# drawing n units (eg turtle.forward(n)) will draw n * SCALE pixels
-SCALE = 40
-
-def scale(x):
-    """
-    Scale the input coordinate(s).
-    """
-    if type(x) is tuple or type(x) is list:
-        return [p * SCALE for p in x]
-    return x * SCALE
-
-def unscale(x):
-    """
-    Unscale the input coordinate(s).
-    """
-    if type(x) is tuple or type(x) is list:
-        return [p / SCALE for p in x]
-    return x / SCALE
-
-def draw_path(bob, path):
-    """
-    Draw the path (list of reeds_shepp.PathElements).
-    """
-    bob = turtle.Turtle()
-    for e in path:
-        gear = 1 if e.gear == rs.Gear.FORWARD else -1
-        if e.steering == rs.Steering.LEFT:
-            bob.circle(scale(1), gear * rad2deg(e.param))
-        elif e.steering == rs.Steering.RIGHT:
-            bob.circle(- scale(1), gear * rad2deg(e.param))
-        elif e.steering == rs.Steering.STRAIGHT:
-            bob.forward(gear * scale(e.param))
 
 
 def trace_path_points(path, pose: tuple = (0, 0, 0)):
@@ -57,11 +21,13 @@ def trace_path_points(path, pose: tuple = (0, 0, 0)):
         if e.steering == rs.Steering.STRAIGHT:  # Replace with actual enum for Steering.STRAIGHT
             # Move straight: distance = gear * parameter
             dist = gear_val * e.param
-            x_new = x + dist * math.cos(theta)
-            y_new = y + dist * math.sin(theta)
-            theta_new = theta  # Heading unchanged
-            poses.append((x_new, y_new, theta_new))
-            x, y, theta = x_new, y_new, theta_new
+
+            for delta in np.linspace(0, dist, 10):
+                x_new = x + delta * math.cos(theta)
+                y_new = y + delta * math.sin(theta)
+                poses.append((x_new, y_new, theta))
+
+            x, y = x_new, y_new,
             
         else:  # Turning motion (LEFT or RIGHT)
             # Determine radius sign: +1 for LEFT, -1 for RIGHT
