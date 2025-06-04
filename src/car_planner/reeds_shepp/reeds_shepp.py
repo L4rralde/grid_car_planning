@@ -58,22 +58,55 @@ class PathElement:
         gear = Gear(-self.gear.value)
         return replace(self, gear=gear)
 
-
-def path_length(path):
+#Turning radius
+def path_length(path, turning_radius: float=0.1):
     """
     this one's obvious
     """
+    acc = 0
+    for e in path:
+        if e.steering == Steering.STRAIGHT:
+            acc += e.param
+        else:
+            acc += turning_radius*e.param
     return sum([e.param for e in path])
 
 
-def get_optimal_path(start, end):
+def get_optimal_path(start, end, turning_radius=0.1):
     """
-    Return the shortest path from start to end among those that exist
+    Return the shortest path from start to end among those that exist,
+    with a specified turning radius (default is 1.0).
     """
     if start == end:
-        return
-    paths = get_all_paths(start, end)
-    return min(paths, key=path_length)
+        return None
+    
+    # Convert angles to degrees for change_of_basis
+    start_deg = (start[0], start[1], rad2deg(start[2]))
+    end_deg = (end[0], end[1], rad2deg(end[2]))
+    
+    # Compute relative pose in start's frame
+    x_rel, y_rel, theta_rel = change_of_basis(start_deg, end_deg)
+    
+    # Normalize by turning radius
+    x_rel_norm = x_rel / turning_radius
+    y_rel_norm = y_rel / turning_radius
+    
+    # Get all paths in normalized space (turning radius = 1)
+    paths = get_all_paths((0, 0, 0), (x_rel_norm, y_rel_norm, theta_rel))
+    
+    if not paths:
+        return None
+    
+    # Find shortest path in normalized space
+    best_normalized_path = min(paths, key=path_length)
+    
+    # Scale parameters by turning radius
+    scaled_path = []
+    for elem in best_normalized_path:
+        scaled_param = elem.param * turning_radius
+        scaled_path.append(PathElement(scaled_param, elem.steering, elem.gear))
+    
+    return scaled_path
 
 
 def get_all_paths(start, end):
