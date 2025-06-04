@@ -1,4 +1,5 @@
 import random
+import math
 
 import numpy as np
 
@@ -54,6 +55,8 @@ class Planner:
         return car.collides(self.grid)
 
     def sample(self) -> list:
+        #if random.random() > 0.9:
+        #    return self.goal
         while True:
             x, y, yaw = np.random.uniform(-1, 1, 3)
             if self.pose_collides((x, y, yaw)):
@@ -78,6 +81,23 @@ class Planner:
                 nearest_v = vertex
         return nearest_v
 
+    def steer(self, vertex: list, sample: list, step_size = 0.2) -> None:
+        dx = sample[0] - vertex[0]
+        dy = sample[1] - vertex[1]
+        d = math.hypot(dx, dy)
+
+        #Sample inside circle. No need to project.
+        if d <= step_size:
+            return sample
+
+        angle = math.atan2(dy, dx)
+        new_x = vertex[0] + step_size * math.cos(angle)
+        new_y = vertex[1] + step_size * math.sin(angle)
+        new_theta = angle  # align orientation to movement direction
+
+        new_sample = (new_x, new_y, new_theta)
+        return new_sample
+
     def path_collides(self, start: list, end: list) -> bool:
         path = Path.optimal_path(start, end)
         for pose in path.get_poses():
@@ -90,12 +110,13 @@ class Planner:
         nearest = self.nearest(sample, 0.5)
         if not nearest:
             return False
+        sample = self.steer(nearest, sample)
         if self.path_collides(nearest, sample):
             return False
         self.milestones.append(sample)
-        paren_node = self.tree.find(nearest)
-        paren_node.append(sample)
-        return True
+        parent_node = self.tree.find(nearest)
+        parent_node.append(sample)
+        return sample == self.goal
 
     def draw_tree(self, start_node=None) -> None:
         current = start_node or self.tree.root
