@@ -33,10 +33,12 @@ class Path:
         return object
 
     def draw(self) -> None:
-        poses = trace_path_points(self.path, self.start, 0.1)
+        poses = self.get_poses()
         pts = np.array([[x, y] for x, y, _ in poses])
         GLUtils.draw_line(pts, size=3)
 
+    def get_poses(self) -> list:
+        return trace_path_points(self.path, self.start, 0.1)
 
 class Planner:
     def __init__(self, grid: object, start: list, goal: list) -> None:
@@ -76,14 +78,24 @@ class Planner:
                 nearest_v = vertex
         return nearest_v
 
+    def path_collides(self, start: list, end: list) -> bool:
+        path = Path.optimal_path(start, end)
+        for pose in path.get_poses():
+            if self.pose_collides(pose):
+                return True
+        return False
+
     def update(self) -> bool:
         sample = self.sample()
         nearest = self.nearest(sample, 0.5)
         if not nearest:
-            return
+            return False
+        if self.path_collides(nearest, sample):
+            return False
         self.milestones.append(sample)
         paren_node = self.tree.find(nearest)
         paren_node.append(sample)
+        return True
 
     def draw_tree(self, start_node=None) -> None:
         current = start_node or self.tree.root
