@@ -37,7 +37,7 @@ class Rectangle:
         self.h = h
         self.yaw = yaw
 
-    def draw(self) -> None:
+    def draw(self, **kwargs) -> None:
         w_cth = self.w * math.cos(self.yaw)
         w_sth = self.w * math.sin(self.yaw)
         h_cth = self.h * math.cos(self.yaw)
@@ -49,23 +49,20 @@ class Rectangle:
             [w_cth + h_sth, w_sth - h_cth],
         ])
 
-        GLUtils.draw_polygon(points)
+        GLUtils.draw_polygon(points, **kwargs)
 
 
-class Arc:
-    def __init__(self, center: tuple, r: float, start: float, end: float) -> None:
-        self.center = np.array(center)
-        self.r = r
-        self.n = int(abs(start - end)//0.2)
-        self.angles = np.linspace(min(start, end), max(start, end), self.n)
+class Line:
+    def __init__(self, end_a: list, end_b: list) -> None:
+        self.end_a = end_a
+        self.end_b = end_b
 
-    def get_pts(self) -> None:
-        pts = np.zeros((self.n, 2))
-        pts[:, 0] = self.r * np.cos(self.angles)
-        pts[:, 1] = self.r * np.sin(self.angles)
-        pts = pts + self.center
-        return pts
+    def draw(self, **kwargs) -> None:
+        GLUtils.draw_line([self.end_a, self.end_b], **kwargs)
 
-    def draw(self) -> None:
-        pts = self.get_pts()
-        GLUtils.draw_line(pts, size=4)
+    @property
+    def slope(self) -> float:
+        return math.atan2(
+            self.end_b[1] - self.end_a[1],
+            self.end_b[0] - self.end_a[0]
+        )

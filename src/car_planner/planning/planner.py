@@ -64,7 +64,8 @@ class Planner:
 
     def sample(self) -> list:
         if random.random() > 0.9:
-            return self.goal
+            almost_goal = list(np.random.normal(self.goal, (.01, .01, 0.2)))
+            return almost_goal
         while True:
             x, y, yaw = np.random.uniform(-1, 1, 3)
             if self.pose_collides((x, y, yaw)):
@@ -93,17 +94,17 @@ class Planner:
         dx = sample[0] - vertex[0]
         dy = sample[1] - vertex[1]
         d = math.hypot(dx, dy)
+        angle = math.atan2(dy, dx)
 
         #Sample inside circle. No need to project.
         if d <= step_size:
             return sample
 
-        angle = math.atan2(dy, dx)
         new_x = vertex[0] + step_size * math.cos(angle)
         new_y = vertex[1] + step_size * math.sin(angle)
-        new_theta = angle  # align orientation to movement direction
+        #new_theta = angle  # align orientation to movement direction
 
-        new_sample = (new_x, new_y, new_theta)
+        new_sample = (new_x, new_y, sample[2])
         return new_sample
 
     def path_collides(self, start: list, end: list) -> bool:
@@ -115,7 +116,7 @@ class Planner:
 
     def update(self) -> bool:
         sample = self.sample()
-        nearest = self.nearest(sample, 0.5)
+        nearest = self.nearest(sample, )
         if not nearest:
             return False
         sample = self.steer(nearest, sample, 0.15)
@@ -124,13 +125,16 @@ class Planner:
         self.milestones.append(sample)
         parent_node = self.tree.find(nearest)
         parent_node.append(sample)
-        return sample == self.goal
+        finished = self.close_enough(sample, 0.04)
+        if finished:
+            self.goal = sample
+        return finished
 
     def draw_tree(self, start_node=None) -> None:
         current = start_node or self.tree.root
         for child in current.children:
-            path = Path.optimal_path(current.data, child.data)
-            path.draw(size=2, color=(0.96, 0.67, 0.71, 1.0))
+            #path = Path.optimal_path(current.data, child.data)
+            #path.draw(size=2, color=(0.96, 0.67, 0.71, 1.0))
             self.draw_tree(child)
 
     def draw_milestones(self) -> None:
@@ -165,3 +169,13 @@ class Planner:
         self.draw_tree()
         self.draw_route()
         self.draw_milestones()
+
+    def close_enough(self, sample: list, th: float=0.2) -> bool:
+        goal_x, goal_y, goal_yaw = self.goal
+        x, y, yaw = sample
+        weighed_d = (
+            (goal_x - x)**2 + (goal_y - y)**2 +
+            0.0001*(goal_yaw - yaw)**2
+        )
+        weighed_d = weighed_d**0.5
+        return weighed_d < th

@@ -58,11 +58,17 @@ class PathElement:
         gear = Gear(-self.gear.value)
         return replace(self, gear=gear)
 
-
-def path_length(path):
+#Turning radius
+def path_length(path, turning_radius: float=0.1):
     """
     this one's obvious
     """
+    acc = 0
+    for e in path:
+        if e.steering == Steering.STRAIGHT:
+            acc += e.param
+        else:
+            acc += turning_radius*e.param
     return sum([e.param for e in path])
 
 
