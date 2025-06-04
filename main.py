@@ -1,3 +1,5 @@
+from argparse import ArgumentParser
+
 import numpy as np
 import pygame
 
@@ -9,6 +11,25 @@ from gridsim.shapes import Line
 from car.car import Car
 from planning.planner import Planner
 
+
+def parse_args() -> object:
+    parser = ArgumentParser()
+
+    parser.add_argument(
+        "--width",
+        default = 720,
+        type = int,
+        help = "Ancho en píxeles de la ventana"
+    )
+    parser.add_argument(
+        "--fps",
+        default = 100,
+        type = int,
+        help = "FPS de la simulación"
+    )
+
+    args = parser.parse_args()
+    return args
 
 class GridScene(GLScene):
     def __init__(self, title: str, width: int, height: int, max_fps: int) -> None:
@@ -90,7 +111,9 @@ class GridScene(GLScene):
             self.car.drive()
 
 def main():
-    scene = GridScene("Grid", 750, 750, 100)
+    args = parse_args()
+
+    scene = GridScene("Grid", args.width, args.width, args.fps)
     scene.run()
 
 
