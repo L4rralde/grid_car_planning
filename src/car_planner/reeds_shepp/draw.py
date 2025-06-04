@@ -6,7 +6,7 @@ from utils import *
 import reeds_shepp.reeds_shepp as rs
 
 
-def trace_path_points(path, pose: tuple = (0, 0, 0)):
+def trace_path_points(path, pose: tuple = (0, 0, 0), r: float=1.0):
     """
     Compute the trajectory points for a given path (list of reeds_shepp.PathElements).
     Returns a list of (x, y) points representing the trajectory.
@@ -36,13 +36,13 @@ def trace_path_points(path, pose: tuple = (0, 0, 0)):
             # Compute circle center relative to current position and heading
             cx = x - r_val * math.sin(theta)
             cy = y + r_val * math.cos(theta)
-            cx = x - r_val*0.1 * math.sin(theta)
-            cy = y + r_val*0.1 * math.cos(theta)
+            cx = x - r_val*r * math.sin(theta)
+            cy = y + r_val*r * math.cos(theta)
             
             # Combined rotation angle = gear * parameter * radius_sign
             angle_sign = gear_val * r_val
             rot_angle = angle_sign * e.param
-            rot_angle = angle_sign * (e.param / 0.1)
+            rot_angle = angle_sign * (e.param / r)
             
             # Vector from center to current position
             dx = x - cx

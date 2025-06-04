@@ -28,14 +28,14 @@ class Path:
 
     @classmethod
     def optimal_path(cls, start: list, goal: list) -> "Path":
-        path = get_optimal_path(start, goal)
+        path = get_optimal_path(start, goal, 0.1)
         object = cls(start, path)
         return object
 
     def draw(self) -> None:
-        poses = trace_path_points(self.path)
+        poses = trace_path_points(self.path, self.start, 0.1)
         pts = np.array([[x, y] for x, y, _ in poses])
-        GLUtils.draw_line(pts, size=4)
+        GLUtils.draw_line(pts, size=3)
 
 
 class Planner:
@@ -78,17 +78,23 @@ class Planner:
 
     def update(self) -> bool:
         sample = self.sample()
-        nearest = self.nearest(sample, 0.25)
+        nearest = self.nearest(sample, 0.5)
         if not nearest:
             return
         self.milestones.append(sample)
+        paren_node = self.tree.find(nearest)
+        paren_node.append(sample)
 
-    def is_feasible_path(self, path: object) -> bool:
-        for pose in trace_path_points(path):
-            if self.pose_collides(pose):
-                return False
-        return True
+    def draw_tree(self, start_node=None) -> None:
+        current = start_node or self.tree.root
+        for child in current.children:
+            Path.optimal_path(current.data, child.data).draw()
+            self.draw_tree(child)
 
-    def draw(self, start_node=None) -> None:
+    def draw_milestones(self) -> None:
         for x, y, _ in self.milestones:
             GLUtils.draw_point(x, y, size=10)
+
+    def draw(self) -> None:
+        self.draw_milestones()
+        self.draw_tree()

@@ -6,7 +6,7 @@ from collisions.grid import Grid
 from utils.utils import GIT_ROOT
 from gridsim.glutils import load_texture_from_image, draw_background, draw_point
 from car.car import Car
-from planning.planner import Planner
+from planning.planner import Planner, Path
 
 class GridScene(GLScene):
     def __init__(self, title: str, width: int, height: int, max_fps: int) -> None:
@@ -27,6 +27,8 @@ class GridScene(GLScene):
         draw_point(self.start[0], self.start[1], size=10, color=(0, 0, 1, 1))
         draw_point(self.end[0], self.end[1], size=10, color=(0, 1, 0, 1))
         self.planner.draw()
+        #Path.optimal_path(self.start, self.end).draw()
+
 
     def get_inputs(self, **kwargs) -> None:
         super().get_inputs(**kwargs)
