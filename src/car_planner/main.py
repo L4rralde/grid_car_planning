@@ -16,9 +16,9 @@ class GridScene(GLScene):
         self.grid = Grid()
         self.texture_bg = self.load_surface()
         self.car = Car(0.1, -0.1, 0.0)
-        self.start = [0.0, 0, 0.0]
+        self.start = [0.0, 0, 1.0]
         self.end = [0.25, 0, 0]
-        self.planner = Planner(self.grid)
+        self.planner = Planner(self.grid, self.start, self.end)
 
     def render(self, **kwargs) -> None:
         super().render(**kwargs)
@@ -26,8 +26,7 @@ class GridScene(GLScene):
         self.grid.draw(point_size = 5)
         draw_point(self.start[0], self.start[1], size=10, color=(0, 0, 1, 1))
         draw_point(self.end[0], self.end[1], size=10, color=(0, 1, 0, 1))
-        self.planner.steer(self.start, self.end)
-
+        self.planner.draw()
 
     def get_inputs(self, **kwargs) -> None:
         super().get_inputs(**kwargs)
@@ -42,24 +41,7 @@ class GridScene(GLScene):
                 self.right_mouse_down = True
                 x, y = pygame.mouse.get_pos()
                 ortho_x, ortho_y = self.to_ortho(x, y)
-                self.start = [ortho_x, ortho_y, 0.0]
-        return
-        for event in self.events:
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button==1:
-                self.left_mouse_down = True
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button==3:
-                self.right_mouse_down = True
-            elif event.type == pygame.MOUSEBUTTONUP:
-                self.left_mouse_down = False
-                self.right_mouse_down = False
-            elif event.type == pygame.MOUSEMOTION and self.left_mouse_down:
-                x, y = pygame.mouse.get_pos()
-                ortho_x, ortho_y = self.to_ortho(x, y)
-                self.grid.append(ortho_x, ortho_y)
-            elif event.type == pygame.MOUSEMOTION and self.right_mouse_down:
-                x, y = pygame.mouse.get_pos()
-                ortho_x, ortho_y = self.to_ortho(x, y)
-                self.grid.pop(ortho_x, ortho_y)
+                self.start = [ortho_x, ortho_y, 1.0]
 
     def load_surface(self) -> object:
         image_path = f"{GIT_ROOT}/world/parking.jpeg"
@@ -71,6 +53,7 @@ class GridScene(GLScene):
 
     def update(self, **kwargs) -> None:
         super().update(**kwargs)
+        self.planner.update()
 
 def main():
     scene = GridScene("Grid", 800, 800, 20)

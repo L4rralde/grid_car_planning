@@ -32,14 +32,17 @@ def trace_path_points(path, pose: tuple = (0, 0, 0)):
         else:  # Turning motion (LEFT or RIGHT)
             # Determine radius sign: +1 for LEFT, -1 for RIGHT
             r_val = 1.0 if e.steering == rs.Steering.LEFT else -1.0  # Replace with actual enums
-            
+
             # Compute circle center relative to current position and heading
             cx = x - r_val * math.sin(theta)
             cy = y + r_val * math.cos(theta)
+            cx = x - r_val*0.1 * math.sin(theta)
+            cy = y + r_val*0.1 * math.cos(theta)
             
             # Combined rotation angle = gear * parameter * radius_sign
             angle_sign = gear_val * r_val
             rot_angle = angle_sign * e.param
+            rot_angle = angle_sign * (e.param / 0.1)
             
             # Vector from center to current position
             dx = x - cx
