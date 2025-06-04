@@ -15,20 +15,28 @@ class GridScene(GLScene):
         self.right_mouse_down = False
         self.grid = Grid()
         self.texture_bg = self.load_surface()
-        self.car = Car(0.1, -0.1, 0.0)
+        #self.car = Car(0.1, -0.1, 0.0)
         self.start = [0.0, 0, 1.0]
-        self.end = [0.25, 0, 0]
-        self.planner = Planner(self.grid, self.start, self.end)
+        self.goal = [0.25, 0, 0]
+        self.planner = Planner(self.grid, self.start, self.goal)
+        self.state = "SAMPLING"
+
+    def reset(self, *, start: list=None, goal: list=None) -> None:
+        if start is not None:
+            self.start = start
+        if goal is not None:
+            self.goal = goal
+        self.state = "SAMPLING"
+        self.planner.reset(start=start, goal=goal)
 
     def render(self, **kwargs) -> None:
         super().render(**kwargs)
         draw_background(*self.texture_bg)
         self.grid.draw(point_size = 5)
         draw_point(self.start[0], self.start[1], size=10, color=(0, 0, 1, 1))
-        draw_point(self.end[0], self.end[1], size=10, color=(0, 1, 0, 1))
+        draw_point(self.goal[0], self.goal[1], size=10, color=(0, 1, 0, 1))
         self.planner.draw()
-        #Path.optimal_path(self.start, self.end).draw()
-
+        #Path.optimal_path(self.start, self.goal).draw()
 
     def get_inputs(self, **kwargs) -> None:
         super().get_inputs(**kwargs)
@@ -38,12 +46,14 @@ class GridScene(GLScene):
                 self.left_mouse_down = True
                 x, y = pygame.mouse.get_pos()
                 ortho_x, ortho_y = self.to_ortho(x, y)
-                self.end = [ortho_x, ortho_y, 0.0]
+                goal = [ortho_x, ortho_y, 0.0]
+                self.reset(goal=goal)
             if event.type == pygame.MOUSEBUTTONDOWN and event.button==3:
                 self.right_mouse_down = True
                 x, y = pygame.mouse.get_pos()
                 ortho_x, ortho_y = self.to_ortho(x, y)
-                self.start = [ortho_x, ortho_y, 1.0]
+                start = [ortho_x, ortho_y, 1.0]
+                self.reset(start=start)
 
     def load_surface(self) -> object:
         image_path = f"{GIT_ROOT}/world/parking.jpeg"
@@ -55,7 +65,12 @@ class GridScene(GLScene):
 
     def update(self, **kwargs) -> None:
         super().update(**kwargs)
-        self.planner.update()
+        if self.state == "SAMPLING":
+            finished = self.planner.update()
+            if finished:
+                self.state = "DRIVING"
+                print("finished")
+            
 
 def main():
     scene = GridScene("Grid", 800, 800, 20)

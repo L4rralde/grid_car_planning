@@ -33,10 +33,10 @@ class Path:
         object = cls(start, path)
         return object
 
-    def draw(self) -> None:
+    def draw(self, **kwargs) -> None:
         poses = self.get_poses()
         pts = np.array([[x, y] for x, y, _ in poses])
-        GLUtils.draw_line(pts, size=3)
+        GLUtils.draw_line(pts, **kwargs)
 
     def get_poses(self) -> list:
         return trace_path_points(self.path, self.start, 0.1)
@@ -49,14 +49,22 @@ class Planner:
         self.milestones = [start]
         self.tree = Tree(start)
 
+    def reset(self, *, start: list=None, goal: list=None) -> None:
+        if start is not None:
+            self.start = start
+        if goal is not None:
+            self.goal = goal
+        self.milestones = [self.start]
+        self.tree = Tree(self.start)
+
     def pose_collides(self, pose: list) -> bool:
         x, y, yaw = pose
         car = Car(x, y, yaw)
         return car.collides(self.grid)
 
     def sample(self) -> list:
-        #if random.random() > 0.9:
-        #    return self.goal
+        if random.random() > 0.9:
+            return self.goal
         while True:
             x, y, yaw = np.random.uniform(-1, 1, 3)
             if self.pose_collides((x, y, yaw)):
@@ -110,7 +118,7 @@ class Planner:
         nearest = self.nearest(sample, 0.5)
         if not nearest:
             return False
-        sample = self.steer(nearest, sample)
+        sample = self.steer(nearest, sample, 0.15)
         if self.path_collides(nearest, sample):
             return False
         self.milestones.append(sample)
@@ -121,13 +129,39 @@ class Planner:
     def draw_tree(self, start_node=None) -> None:
         current = start_node or self.tree.root
         for child in current.children:
-            Path.optimal_path(current.data, child.data).draw()
+            path = Path.optimal_path(current.data, child.data)
+            path.draw(size=2, color=(0.96, 0.67, 0.71, 1.0))
             self.draw_tree(child)
 
     def draw_milestones(self) -> None:
         for x, y, _ in self.milestones:
-            GLUtils.draw_point(x, y, size=10)
+            GLUtils.draw_point(x, y, size=3)
+
+    def get_route(self) -> list:
+        current = self.tree.find(self.goal)
+        if current is None:
+            return []
+        rev_hierarchy = [current.data]
+        while current.parent is not None:
+            current = current.parent
+            rev_hierarchy.append(current.data)
+        hierarchy = rev_hierarchy[::-1]
+
+        poses = []
+        for i in range(len(hierarchy) - 1):
+            current_path = Path.optimal_path(hierarchy[i], hierarchy[i+1])
+            poses += current_path.get_poses()
+
+        return poses
+
+    def draw_route(self) -> None:
+        route = self.get_route()
+        if route == []:
+            return
+        pts = [(x, y) for x,y,_ in route]
+        GLUtils.draw_line(pts, size=3, color=(0.52, 0.11, 0.24, 1))
 
     def draw(self) -> None:
-        self.draw_milestones()
         self.draw_tree()
+        self.draw_route()
+        self.draw_milestones()
