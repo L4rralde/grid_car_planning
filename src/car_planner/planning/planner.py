@@ -63,8 +63,8 @@ class Planner:
         return car.collides(self.grid)
 
     def sample(self) -> list:
-        if random.random() > 0.9:
-            almost_goal = list(np.random.normal(self.goal, (.01, .01, 0.2)))
+        if random.random() > 0.75:
+            almost_goal = list(np.random.normal(self.goal, (.1, .1, 0.2)))
             return almost_goal
         while True:
             x, y, yaw = np.random.uniform(-1, 1, 3)
@@ -134,7 +134,7 @@ class Planner:
         current = start_node or self.tree.root
         for child in current.children:
             #path = Path.optimal_path(current.data, child.data)
-            #path.draw(size=2, color=(0.96, 0.67, 0.71, 1.0))
+            #path.draw(size=2, color=(0.96, 0.5, 0.6, 1.0))
             self.draw_tree(child)
 
     def draw_milestones(self) -> None:
@@ -175,7 +175,7 @@ class Planner:
         x, y, yaw = sample
         weighed_d = (
             (goal_x - x)**2 + (goal_y - y)**2 +
-            0.0001*(goal_yaw - yaw)**2
+            0.001*(goal_yaw - yaw)**2
         )
         weighed_d = weighed_d**0.5
         return weighed_d < th
