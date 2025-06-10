@@ -1,6 +1,6 @@
 # RRT with Reeds-Shepp paths
 
-![gif][car_sim.gif]
+![gif](https://github.com/L4rralde/grid_car_planning/blob/main/docs/car_sim.gif)
 
 ## Install
 
@@ -36,4 +36,4 @@ The simulator works with a discrete occupancy grid. RRT is run with a Reeds-Shep
 
 4. The trajectory from the nearest milestone to the projected configuration is computed with Reeds-Shepp. If the trajectory is collision free, this projected configuration is added to the Tree.
 
-![events][eventos.jpeg]
+![events](https://github.com/L4rralde/grid_car_planning/blob/main/docs/eventos.jpeg)
